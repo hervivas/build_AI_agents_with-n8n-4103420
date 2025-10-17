@@ -1,0 +1,79 @@
+{
+  "name": "Presales Agent - Calculator Tool",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "exhibit_type"
+            },
+            {
+              "name": "size_sqft"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "def3773b-04fe-4f42-b455-cf7884644752",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = (items[0] && items[0].json) || {};\nconst type = String(item.exhibit_type || \"\").trim().toLowerCase();\nconst size = Number(item.size_sqft);\n\nif (!Number.isFinite(size)) throw new Error(\"size_sqft must be a number\");\n\nconst booths = {\n  inline:    { price: 55, fee: 800,  min: 100 },\n  corner:    { price: 60, fee: 1000, min: 200 },\n  peninsula: { price: 70, fee: 1200, min: 400 },\n};\n\nconst cfg = booths[type];\nif (!cfg) throw new Error(`Invalid exhibit type: ${type}`);\nif (!(size > 0)) throw new Error(\"Booth size must be greater than 0\");\nif (size < cfg.min) throw new Error(`Min size for ${type} is ${cfg.min}`);\n\nconst subtotal = size * cfg.price;\nreturn [{\n  json: {\n    type,\n    size_sqft: size,\n    price_per_sqft: cfg.price,\n    registration_fee: cfg.fee,\n    subtotal,\n    total: subtotal + cfg.fee,\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "11fbd06a-905d-48de-887e-e7a2a3191369",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "exhibit_type": "inline",
+          "size_sqft": "100"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e8b8a4fa-caaf-4799-b1a0-e0b0bac90486",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "94e1edcc34a91a151fc2ec1b99597068a304e37fdb946fc806f00f97776fce3a"
+  },
+  "id": "56d5dyxf8PKztDKh",
+  "tags": []
+}
